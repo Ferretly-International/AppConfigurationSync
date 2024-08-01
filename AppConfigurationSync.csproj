@@ -5,6 +5,15 @@
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <UserSecretsId>0abf7fd9-e837-4be4-bf8e-885bb894f2d8</UserSecretsId>
     </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Azure.Data.AppConfiguration" Version="1.4.1" />
+      <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="8.0.0" />
+      <PackageReference Include="Spectre.Console" Version="0.45.0" />
+      <PackageReference Include="Spectre.Console.Cli" Version="0.45.0" />
+    </ItemGroup>
 
 </Project>
