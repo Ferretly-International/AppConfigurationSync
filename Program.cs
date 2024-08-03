@@ -57,6 +57,10 @@ class Program
             destinationSettings.Add(setting);
         }
 
+        AnsiConsole.MarkupLine("[bold]Keys in [red]red[/] are missing in the destination[/]");
+        AnsiConsole.MarkupLine("[bold]Keys in [green]green[/] are present in the destination but with a different value[/]");
+        AnsiConsole.WriteLine();
+        
         var labelsToIgnore = new[] { "Development", "Staging" };
         
         foreach (var setting in sourceSettings.Where(s => !labelsToIgnore.Contains(s.Label)))
