@@ -79,13 +79,72 @@ class Program
             
             var color = existsInDestination ? "[green]" : "[red]";
             var valueColor = valuesMatch ? "[green]" : "[red]";
-            
-            AnsiConsole.MarkupLine(string.IsNullOrEmpty(setting.Label)
-                ? $"[bold]{color}{setting.Key}[/][/]: {valueColor}{setting.Value}[/]"
-                : $"[bold]{color}{setting.Key}[/][/]: {valueColor}{setting.Value}[/] [grey]({setting.Label})[/]");
+
+            try
+            {
+                var value = Markup.Escape(setting.Value);
+
+                    AnsiConsole.MarkupLine(string.IsNullOrEmpty(setting.Label)
+                        ? $"[bold]{color}{setting.Key}[/][/]: {valueColor}{value}[/]"
+                        : $"[bold]{color}{setting.Key}[/][/]: {valueColor}{value}[/] [grey]({setting.Label})[/]");
+                
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+        }
+
+        // Prompt user to choose whether to show identical config keys
+        var showIdenticalKeys = AnsiConsole
+            .Prompt(
+                new SelectionPrompt<bool> { Converter = value => value ? "Yes" : "No" }
+                    .Title($"Show config keys that are identical between both App Configuration resources?")
+                    .AddChoices(true, false));
+
+        if (showIdenticalKeys)
+        {
+            AnsiConsole.WriteLine();
+            AnsiConsole.MarkupLine("[bold]Identical Keys:[/]");
+            AnsiConsole.WriteLine();
+
+            foreach (var setting in sourceSettings.Where(s => !labelsToIgnore.Contains(s.Label)))
+            {
+                var existsInDestination = destinationSettings.Any(s => s.Key == setting.Key
+                    && s.Label == setting.Label);
+                
+                var valuesMatch = destinationSettings.Any(s => s.Key == setting.Key
+                    && s.Label == setting.Label
+                    && s.Value == setting.Value);
+
+                if (!existsInDestination || !valuesMatch)
+                {
+                    continue;
+                }
+                
+                var value = Markup.Escape(setting.Value);
+
+                try
+                {
+                    AnsiConsole.MarkupLine(string.IsNullOrEmpty(setting.Label)
+                        ? $"[bold][green]{setting.Key}[/][/]"
+                        : $"[bold][green]{setting.Key}[/][/] [grey]({setting.Label})[/]");
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
+            }
         }
     }
-
+    
+    private static bool IsJson(string input)
+    {
+        input = input.Trim();
+        return (input.StartsWith("{") && input.EndsWith("}")) || // For object
+               (input.StartsWith("[") && input.EndsWith("]"));   // For array
+    }
+    
     private static async Task CreateSnapshot(ConfigurationClient sourceClient)
     {
         var snapshotNamePrefix = $"{DateTime.Now:yyyy-MM-dd}_";
