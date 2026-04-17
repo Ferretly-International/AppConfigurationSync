@@ -13,6 +13,7 @@ class Program
     {
         // add app configuration with user secrets
         var builder = new ConfigurationBuilder()
+            .AddJsonFile("appsettings.json", optional: true)
             .AddUserSecrets<Program>();
 
         var configuration = builder.Build();
@@ -62,8 +63,11 @@ class Program
         AnsiConsole.WriteLine();
         
         var labelsToIgnore = new[] { "Development", "Staging" };
-        
-        foreach (var setting in sourceSettings.Where(s => !labelsToIgnore.Contains(s.Label)))
+        var keysToIgnore = configuration.GetSection("KeysToIgnore").Get<string[]>() ?? [];
+
+        foreach (var setting in sourceSettings
+            .Where(s => !labelsToIgnore.Contains(s.Label))
+            .Where(s => !KeyFilter.ShouldIgnore(s.Key, keysToIgnore)))
         {
             var existsInDestination = destinationSettings.Any(s => s.Key == setting.Key
                 && s.Label == setting.Label);
@@ -108,7 +112,9 @@ class Program
             AnsiConsole.MarkupLine("[bold]Identical Keys:[/]");
             AnsiConsole.WriteLine();
 
-            foreach (var setting in sourceSettings.Where(s => !labelsToIgnore.Contains(s.Label)))
+            foreach (var setting in sourceSettings
+                .Where(s => !labelsToIgnore.Contains(s.Label))
+                .Where(s => !KeyFilter.ShouldIgnore(s.Key, keysToIgnore)))
             {
                 var existsInDestination = destinationSettings.Any(s => s.Key == setting.Key
                     && s.Label == setting.Label);
