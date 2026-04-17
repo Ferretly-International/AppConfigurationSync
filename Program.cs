@@ -70,7 +70,7 @@ class Program
             
             var valuesMatch = destinationSettings.Any(s => s.Key == setting.Key
                 && s.Label == setting.Label
-                && s.Value == setting.Value);
+                && NormalizeValue(s.Value) == NormalizeValue(setting.Value));
 
             if (existsInDestination && valuesMatch)
             {
@@ -115,7 +115,7 @@ class Program
                 
                 var valuesMatch = destinationSettings.Any(s => s.Key == setting.Key
                     && s.Label == setting.Label
-                    && s.Value == setting.Value);
+                    && NormalizeValue(s.Value) == NormalizeValue(setting.Value));
 
                 if (!existsInDestination || !valuesMatch)
                 {
@@ -138,6 +138,9 @@ class Program
         }
     }
     
+    private static string NormalizeValue(string? value) =>
+        (value ?? string.Empty).Trim().Replace("\r\n", "\n").Replace("\r", "\n");
+
     private static bool IsJson(string input)
     {
         input = input.Trim();
